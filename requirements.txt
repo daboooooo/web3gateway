@@ -1,0 +1,32 @@
+python-dotenv==1.0.0
+
+ccxt==4.4.43
+# Web3.py https://github.com/ethereum/web3.py
+web3==7.5.0
+# redis-py https://github.com/redis/redis-py
+redis==5.2.1
+
+cryptography==42.0.8; platform_machine == 'armv7l'
+cryptography==44.0.0; platform_machine != 'armv7l'
+aiohttp==3.10.11
+SQLAlchemy==2.0.36
+python-telegram-bot==21.9
+
+# can't be hard-pinned due to telegram-bot pinning httpx with ~
+httpx>=0.24.1
+humanize==4.11.0
+cachetools==5.5.0
+requests==2.32.3
+urllib3==2.3.0
+jsonschema==4.23.0
+
+rich==13.9.4
+pyarrow==18.1.0; platform_machine != 'armv7l'
+
+# API Server
+fastapi==0.115.6
+pydantic==2.10.4
+uvicorn==0.34.0
+pyjwt==2.10.1
+aiofiles==24.1.0
+psutil==6.1.1
