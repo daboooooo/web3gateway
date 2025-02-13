@@ -1,8 +1,6 @@
-from dotenv import load_dotenv
+""" web3gateway package """
 
-load_dotenv("_env")
-
-__version__ = "dev"
+__version__ = "2025.02-dev"
 
 if "dev" in __version__:
     from pathlib import Path
@@ -26,4 +24,4 @@ if "dev" in __version__:
         )
 
     except Exception:  # pragma: no cover
-        pass
+        print("Failed to get git version")

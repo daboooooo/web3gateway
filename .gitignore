@@ -54,3 +54,6 @@ coverage.xml
 # _env
 _env
 _env/
+
+# config and data
+*.json

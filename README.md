@@ -47,3 +47,77 @@ Web3 Restful Gateway 是多链支持的Web3网关服务，为区块链应用提�
    - Token余额查询
    - 交易历史记录
    - 缓存支持的快速查询
+
+
+## 测试命令
+
+以下是针对各个 RESTful API 的测试命令，使用地址 `0x32f7cb25353f1acae03ade9ca8e91ecad57fd7b0`：
+
+1. **Ping API**
+
+```bash
+curl -X GET "http://localhost:8000/ping"
+```
+
+2. **Assemble Transaction API**
+
+```bash
+curl -X POST "http://localhost:8000/transaction/assemble" -H "Content-Type: application/json" -d '{
+    "chain_id": 1,
+    "tx_params": {
+        "from": "0x32f7cb25353f1acae03ade9ca8e91ecad57fd7b0",
+        "to": "0x32f7cb25353f1acae03ade9ca8e91ecad57fd7b0",
+        "value": "0x0",
+        "data": ""
+    },
+    "gas_level": "standard"
+}'
+```
+
+3. **Send Transaction API**
+
+```bash
+curl -X POST "http://localhost:8000/transaction/send" -H "Content-Type: application/json" -d '{
+    "chain_id": 1,
+    "raw_tx": "0x..."
+}'
+```
+
+4. **Get Transaction Receipt API**
+
+```bash
+curl -X POST "http://localhost:8000/transaction/get_receipt" -H "Content-Type: application/json" -d '{
+    "chain_id": 1,
+    "tx_hash": "0x..."
+}'
+```
+
+5. **Get Account Balance API**
+
+```bash
+curl -X POST "http://localhost:8000/account/balance" -H "Content-Type: application/json" -d '{
+    "chain_id": 1,
+    "address": "0x32f7cb25353f1acae03ade9ca8e91ecad57fd7b0"
+}'
+```
+
+6. **Get Account Token Balance API**
+
+```bash
+curl -X POST "http://localhost:8000/account/token_balance" -H "Content-Type: application/json" -d '{
+    "chain_id": 1,
+    "contractaddress": "0x...",
+    "address": "0x32f7cb25353f1acae03ade9ca8e91ecad57fd7b0"
+}'
+```
+
+7. **Get Account Transactions API**
+
+```bash
+curl -X POST "http://localhost:8000/account/txlist" -H "Content-Type: application/json" -d '{
+    "chain_id": 1,
+    "address": "0x32f7cb25353f1acae03ade9ca8e91ecad57fd7b0"
+}'
+```
+
+请根据实际情况替换 `0x...` 部分的值。

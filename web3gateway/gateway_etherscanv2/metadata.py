@@ -1,3 +1,4 @@
+
 base_url: str = "https://api.etherscan.io/v2/api"
 
 supported_chains: dict[str, str] = {
@@ -61,17 +62,21 @@ valid_params = {
     'txlist': ['address', 'startblock', 'endblock', 'page', 'offset', 'sort'],
     'txlistinternal': ['address', 'txhash', 'startblock', 'endblock', 'page', 'offset', 'sort'],
     'tokentx': ['address', 'contractaddress', 'page', 'offset', 'startblock', 'endblock', 'sort'],
-    'tokennfttx': ['address', 'contractaddress', 'page', 'offset', 'startblock', 'endblock', 'sort'],
-    'token1155tx': ['address', 'contractaddress', 'page', 'offset', 'startblock', 'endblock', 'sort'],
+    'tokennfttx': ['address', 'contractaddress', 'page', 'offset', 'startblock',
+                   'endblock', 'sort'],
+    'token1155tx': ['address', 'contractaddress', 'page', 'offset', 'startblock',
+                    'endblock', 'sort'],
     'getminedblocks': ['address', 'blocktype', 'page', 'offset'],
-    'txsBeaconWithdrawal': ['address', 'contractaddress', 'page', 'offset', 'startblock', 'endblock', 'sort'],
+    'txsBeaconWithdrawal': ['address', 'contractaddress', 'page', 'offset',
+                            'startblock', 'endblock', 'sort'],
     'balancehistory': ['address', 'blockno'],
 
     # Contracts
     'getabi': ['address'],
     'getsourcecode': ['address'],
     'getcontractcreation': ['contractaddress'],
-    'verifysourcecode': ['codeformat', 'sourceCode', 'constructorArguements', 'contractaddress', 'contractname',
+    'verifysourcecode': ['codeformat', 'sourceCode', 'constructorArguements', 'contractaddress',
+                         'contractname',
                          'compilerversion'],
     'checkverifystatus': ['guid'],
     'verifyproxycontract': ['address'],

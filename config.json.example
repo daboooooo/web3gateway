@@ -1,0 +1,13 @@
+{
+    "infura_project_id": "your infura project id",
+    "etherscan_api_key": "your etherscan api key",
+    "bsc_mainnet_explorer_api_key": "your bscscan api key",
+    "redis_url": "redis://localhost:6379",
+    "redis_host": "localhost",
+    "redis_port": 6379,
+    "redis_db": 0,
+    "redis_password": "",
+    "rate_limit_calls": 5,
+    "rate_limit_period": 1,
+    "cache_expiration": 10
+}
