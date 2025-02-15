@@ -74,7 +74,7 @@ valid_params = {
     # Contracts
     'getabi': ['address'],
     'getsourcecode': ['address'],
-    'getcontractcreation': ['contractaddress'],
+    'getcontractcreation': ['contractaddresses'],
     'verifysourcecode': ['codeformat', 'sourceCode', 'constructorArguements', 'contractaddress',
                          'contractname',
                          'compilerversion'],

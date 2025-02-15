@@ -34,16 +34,16 @@ class EtherScanV2:
         from .chainspecific import ChainSpecific
         from .contracts import Contracts
         from .gastracker import GasTracker
+        from .geth_proxy import Proxy
         from .logs import Logs
-        from .proxies import Proxy
         from .stats import Stats
         from .tokens import Tokens
-        from .transactions import Transactions
+        from .transaction import Transaction
         from .usage import Usage
 
         self.account = Accounts(self)
         self.contract = Contracts(self)
-        self.transaction = Transactions(self)
+        self.transaction = Transaction(self)
         self.block = Blocks(self)
         self.logs = Logs(self)
         self.proxy = Proxy(self)
@@ -103,8 +103,13 @@ class EtherScanV2:
         if res.status_code != 200:
             raise OSError(f"Failed to get Etherscan url: {url}")
         res_dict = res.json()
-        if res_dict['status'] == '0' or res_dict['message'] == 'NOTOK':
-            raise ValueError(res_dict['result'])
+        if 'status' in res_dict:
+            if res_dict['status'] == '0' or res_dict['message'] == 'NOTOK':
+                print(res_dict)
+                raise ValueError(res_dict['result'])
+        elif 'jsonrpc' in res_dict:
+            if res_dict['jsonrpc'] != '2.0':
+                raise ValueError("Unknown jsonrpc version")
 
         # 将结果存入缓存
         await self.cache.set(cache_key, res_dict['result'], expire=self.config['cache_expiration'])

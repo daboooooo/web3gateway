@@ -2,8 +2,9 @@ import logging
 from datetime import datetime
 from typing import Any, Dict
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from web3 import Web3
 
@@ -28,6 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+security = HTTPBasic()
+
 
 def with_timestamp(data: Dict[str, Any]) -> Dict[str, Any]:
     """为响应数据添加时间戳（毫秒级）"""
@@ -35,6 +38,18 @@ def with_timestamp(data: Dict[str, Any]) -> Dict[str, Any]:
         "timestamp": int(datetime.utcnow().timestamp() * 1000),
         "data": data
     }
+
+
+def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
+    # todo: replace with real authentication
+    username = config['auth_username']
+    password = config['auth_password']
+    if credentials.username != username or credentials.password != password:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
 
 
 @app.get("/ping")
@@ -49,7 +64,8 @@ class AssembleTranactionRequest(BaseModel):
 
 
 @app.post("/transaction/assemble")
-async def assemble_tx(request: AssembleTranactionRequest):
+async def assemble_tx(request: AssembleTranactionRequest,
+                      credentials: HTTPBasicCredentials = Depends(authenticate)):
     try:
         # convert address to checksum address
         from_address = Web3.to_checksum_address(request.tx_params['from'].lower())
@@ -73,7 +89,8 @@ class SendTransactionRequest(BaseModel):
 
 
 @app.post("/transaction/send")
-async def send_transaction(request: SendTransactionRequest):
+async def send_transaction(request: SendTransactionRequest,
+                           credentials: HTTPBasicCredentials = Depends(authenticate)):
     try:
         tx_hash = await gw_blockchain.send_raw_transaction(
             request.chain_id, request.raw_tx)
@@ -88,7 +105,8 @@ class GetTransactionReceiptRequest(BaseModel):
 
 
 @app.post("/transaction/get_receipt")
-async def get_transaction_receipt(request: GetTransactionReceiptRequest):
+async def get_transaction_receipt(request: GetTransactionReceiptRequest,
+                                  credentials: HTTPBasicCredentials = Depends(authenticate)):
     """ get transaction status """
     try:
         receipt = await gw_blockchain.get_transaction_receipt(
@@ -104,7 +122,8 @@ class AccountBalanceRequest(BaseModel):
 
 
 @app.post("/account/balance")
-async def get_account_balance(request: AccountBalanceRequest):
+async def get_account_balance(request: AccountBalanceRequest,
+                              credentials: HTTPBasicCredentials = Depends(authenticate)):
     try:
         gw_etherscan.set_chain_id(request.chain_id)
         address = Web3.to_checksum_address(request.address)
@@ -122,7 +141,8 @@ class AccountTokenBalanceRequest(BaseModel):
 
 
 @app.post("/account/token_balance")
-async def get_account_token_balance(request: AccountTokenBalanceRequest):
+async def get_account_token_balance(request: AccountTokenBalanceRequest,
+                                    credentials: HTTPBasicCredentials = Depends(authenticate)):
     try:
         gw_etherscan.set_chain_id(request.chain_id)
         contract_address = Web3.to_checksum_address(request.contractaddress)
@@ -136,7 +156,7 @@ async def get_account_token_balance(request: AccountTokenBalanceRequest):
         # }
         return with_timestamp({"contract address": contract_address,
                                "address": address,
-                               "token balance": response['result']})
+                               "token balance": response})
     except Exception as e:
         logging.exception("Error getting tokens for "
                           f"{request.chain_id}:{request.contractaddress}:{request.address}")
@@ -149,7 +169,8 @@ class AccountTransactionsRequest(BaseModel):
 
 
 @app.post("/account/txlist")
-async def get_account_transactions(request: AccountTransactionsRequest):
+async def get_account_transactions(request: AccountTransactionsRequest,
+                                   credentials: HTTPBasicCredentials = Depends(authenticate)):
     try:
         gw_etherscan.set_chain_id(request.chain_id)
         txs = await gw_etherscan.account.txlist(request.address)
