@@ -1,66 +1,75 @@
-from . import EtherScanV2
+"""
+Etherscan Blocks Module
+
+This module provides functionality for block-related operations:
+- Block rewards
+- Block countdown
+- Block timing
+"""
+
+from typing import Literal
 
 
 class Blocks:
-    """Block APIs from Etherscan
-    https://docs.etherscan.io/etherscan-v2/api-endpoints/blocks
+    """
+    Block-related API endpoint wrapper.
+
+    Provides methods for querying block information including
+    rewards, countdown times, and block numbers by timestamp.
+
+    Attributes:
+        client: EtherScanV2 client instance for making API calls
     """
 
-    def __init__(self, etherscan: 'EtherScanV2'):
-        self.etherscan = etherscan
-
-    def getblockreward(self, blockno: int):
-        """Returns the block reward and 'Uncle' block rewards for a given block number.
+    def __init__(self, client):
+        """
+        Initialize Blocks endpoint wrapper.
 
         Args:
-            blockno: Block number
-
-        Returns:
-            {
-                "blockNumber": "2165403",
-                "timeStamp": "1472533979",
-                "blockMiner": "0x13a06d3dfe21e0db5c016c03ea7d2509f7f8d1e3",
-                "blockReward": "5314181600000000000",
-                "uncles": [
-                    {
-                        "miner": "0xbcdfc35b86bedf72f0cda046a3c16829a2ef41d1",
-                        "unclePosition": "0",
-                        "blockreward": "3750000000000000000"
-                    }
-                ],
-                "uncleInclusionReward": "312500000000000000"
-            }
+            client: EtherScanV2 client instance
         """
-        return self.etherscan.request("block", "getblockreward", {'blockno': blockno})
+        self.client = client
 
-    def getblockcountdown(self, blockno: int):
-        """Returns the estimated time remaining, in seconds, until a certain block is mined.
+    async def getblockreward(self, blockno: int):
+        """
+        Get block reward and fee info.
 
         Args:
-            blockno: Target future block number
+            blockno: Block number to query
 
         Returns:
-            {
-                "CurrentBlock": "16692436",
-                "CountdownBlock": "16692499",
-                "RemainingBlock": "63",
-                "EstimateTimeInSec": "755.0"
-            }
+            Block reward information
         """
-        return self.etherscan.request("block", "getblockcountdown", {'blockno': blockno})
+        params = {"blockno": blockno}
+        return await self.client.request("block", "getblockreward", params)
 
-    def getblocknobytime(self, timestamp: int, closest: str = "before"):
-        """Returns the block number that was mined at a given timestamp.
+    async def getblockcountdown(self, blockno: int):
+        """
+        Get estimated time remaining until a block.
 
         Args:
-            timestamp: Unix timestamp in seconds
-            closest: 'before' or 'after' - Search for block before or after timestamp
+            blockno: Target block number
 
         Returns:
-            Block number as string, e.g. "16691395"
+            Estimated countdown information
         """
-        return self.etherscan.request("block", "getblocknobytime",
-                                      {'timestamp': timestamp, 'closest': closest})
+        params = {"blockno": blockno}
+        return await self.client.request("block", "getblockcountdown", params)
+
+    async def getblocknobytime(self, timestamp: int,
+                               closest: Literal["before", "after"] = "before"):
+        """
+        Get block number by timestamp.
+
+        Args:
+            timestamp: Unix timestamp
+            closest: Return block before or after timestamp
+
+        Returns:
+            Block number information
+        """
+        params = {"timestamp": timestamp, "closest": closest}
+        return await self.client.request("block", "getblocknobytime", params)
 
     def dailyavgblocksize(self, startdate: str, enddate: str, sort: str = "asc"):
         """ [PRO] Returns the daily average block size within a date range.
@@ -80,8 +89,9 @@ class Blocks:
                 ...
             ]
         """
-        return self.etherscan.request("stats", "dailyavgblocksize",
-                                      {'startdate': startdate, 'enddate': enddate, 'sort': sort})
+        return self.client.request(
+            "stats", "dailyavgblocksize",
+            {'startdate': startdate, 'enddate': enddate, 'sort': sort})
 
     def dailyblkcount(self, startdate: str, enddate: str, sort: str = "asc"):
         """ [PRO] Returns the number of blocks mined daily within a date range.
@@ -101,8 +111,9 @@ class Blocks:
                 ...
             ]
         """
-        return self.etherscan.request("stats", "dailyblkcount",
-                                      {'startdate': startdate, 'enddate': enddate, 'sort': sort})
+        return self.client.request(
+            "stats", "dailyblkcount",
+            {'startdate': startdate, 'enddate': enddate, 'sort': sort})
 
     def dailyblockrewards(self, startdate: str, enddate: str, sort: str = "asc"):
         """ [PRO] Returns the daily block rewards within a date range.
@@ -122,8 +133,9 @@ class Blocks:
                 ...
             ]
         """
-        return self.etherscan.request("stats", "dailyblockrewards",
-                                      {'startdate': startdate, 'enddate': enddate, 'sort': sort})
+        return self.client.request(
+            "stats", "dailyblockrewards",
+            {'startdate': startdate, 'enddate': enddate, 'sort': sort})
 
     def dailyavgblocktime(self, startdate: str, enddate: str, sort: str = "asc"):
         """ [PRO] Returns the daily average block time within a date range.
@@ -143,8 +155,9 @@ class Blocks:
                 ...
             ]
         """
-        return self.etherscan.request("stats", "dailyavgblocktime",
-                                      {'startdate': startdate, 'enddate': enddate, 'sort': sort})
+        return self.client.request(
+            "stats", "dailyavgblocktime",
+            {'startdate': startdate, 'enddate': enddate, 'sort': sort})
 
     def dailyuncleblkcount(self, startdate: str, enddate: str, sort: str = "asc"):
         """ [PRO] Returns the number of 'Uncle' blocks mined daily within a date range.
@@ -164,5 +177,6 @@ class Blocks:
                 ...
             ]
         """
-        return self.etherscan.request("stats", "dailyuncleblkcount",
-                                      {'startdate': startdate, 'enddate': enddate, 'sort': sort})
+        return self.client.request(
+            "stats", "dailyuncleblkcount",
+            {'startdate': startdate, 'enddate': enddate, 'sort': sort})

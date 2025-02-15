@@ -2,7 +2,7 @@
 
 > A high-performance, multi-chain Web3 gateway service that provides unified RESTful APIs for blockchain interaction.
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.68%2B-green.svg)](https://fastapi.tiangolo.com)
 [![Web3.py](https://img.shields.io/badge/web3.py-6.0.0-orange.svg)](https://web3py.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

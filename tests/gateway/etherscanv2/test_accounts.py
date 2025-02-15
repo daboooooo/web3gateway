@@ -31,7 +31,7 @@ async def test_balance(etherscan):
 async def test_balancemulti(etherscan):
     """测试批量获取账户余额"""
     addresses = [TEST_ADDRESS, "0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326"]
-    result = await etherscan.account.balancemulti(",".join(addresses))
+    result = await etherscan.account.balancemulti(addresses)
     assert isinstance(result, list)
     assert len(result) == 2
     for balance in result:

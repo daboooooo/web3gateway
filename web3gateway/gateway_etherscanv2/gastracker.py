@@ -1,49 +1,75 @@
-from . import EtherScanV2
+"""
+Etherscan Gas Tracker Module
+
+This module provides functionality for gas-related operations:
+- Gas price estimation
+- Gas oracle information
+- Historical gas statistics
+"""
 
 
 class GasTracker:
+    """
+    Gas tracking API endpoint wrapper.
 
-    def __init__(self, etherscan: 'EtherScanV2'):
-        self.etherscan = etherscan
+    Provides methods for monitoring and estimating gas prices,
+    including historical data and real-time oracle information.
+
+    Attributes:
+        client: EtherScanV2 client instance for making API calls
+    """
+
+    def __init__(self, client):
+        """
+        Initialize GasTracker endpoint wrapper.
+
+        Args:
+            client: EtherScanV2 client instance
+        """
+        self.client = client
 
     def gasestimate(self, gasprice: int):
-        return self.etherscan.request("gastracker", "gasestimate", {'gasprice': gasprice})
+        """
+        Estimate gas usage for a given gas price.
 
-    def gasoracle(self):
-        return self.etherscan.request("gastracker", "gasoracle", {})
-
-    def dailyavggaslimit(self, startdate: str, enddate: str, sort: str = 'asc'):
-        """ [PRO] Returns the historical daily average gas limit of the Ethereum network.
-
-        Params:
-            startdate 2019-02-01
-            enddate 2019-02-28
-            sort
+        Args:
+            gasprice: Gas price in Wei
 
         Returns:
-            {
-                "status":"1",
-                "message":"OK",
-                "result":[
-                    {
-                        "UTCDate":"2019-02-01",
-                        "unixTimeStamp":"1548979200",
-                        "gasLimit":"8001360"
-                    },
-                    {
-                        "UTCDate":"2019-02-27",
-                        "unixTimeStamp":"1551225600",
-                        "gasLimit":"8001071"
-                    },
-                    {
-                        "UTCDate":"2019-02-28",
-                        "unixTimeStamp":"1551312000",
-                        "gasLimit":"8001137"
-                    }
-                ]
-            }
+            Estimated gas consumption in units
         """
-        return self.etherscan.request(
+        return self.client.request("gastracker", "gasestimate", {'gasprice': gasprice})
+
+    def gasoracle(self):
+        """
+        Get current gas oracle data.
+
+        Returns:
+            Dict containing:
+            - SafeLow: Safe low gas price
+            - Standard: Standard gas price
+            - Fast: Fast gas price
+            - Fastest: Fastest gas price
+            - ProposeGasPrice: Suggested gas price
+        """
+        return self.client.request("gastracker", "gasoracle", {})
+
+    def dailyavggaslimit(self, startdate: str, enddate: str, sort: str = 'asc'):
+        """
+        Get historical daily average gas limit data.
+
+        Args:
+            startdate: Start date in YYYY-MM-DD format (e.g., 2019-02-01)
+            enddate: End date in YYYY-MM-DD format
+            sort: Sort order ('asc' or 'desc')
+
+        Returns:
+            List of daily gas limit records containing:
+            - UTCDate: Date in YYYY-MM-DD format
+            - unixTimeStamp: Unix timestamp
+            - gasLimit: Average gas limit for the day
+        """
+        return self.client.request(
             "stats", "dailyavggaslimit",
             {
                 'startdate': startdate,
@@ -52,9 +78,31 @@ class GasTracker:
             })
 
     def dailygasused(self, **params):
-        """ [PRO] """
-        return self.etherscan.request("stats", "dailygasused", params)
+        """
+        Get daily gas consumption statistics [PRO].
+
+        Args:
+            **params: Query parameters including:
+                - startdate: Start date (YYYY-MM-DD)
+                - enddate: End date (YYYY-MM-DD)
+                - sort: Sort order
+
+        Returns:
+            Daily gas usage statistics
+        """
+        return self.client.request("stats", "dailygasused", params)
 
     def dailyavggasprice(self, **params):
-        """ [PRO] """
-        return self.etherscan.request("stats", "dailyavggasprice", params)
+        """
+        Get daily average gas price statistics [PRO].
+
+        Args:
+            **params: Query parameters including:
+                - startdate: Start date (YYYY-MM-DD)
+                - enddate: End date (YYYY-MM-DD)
+                - sort: Sort order
+
+        Returns:
+            Daily average gas price statistics
+        """
+        return self.client.request("stats", "dailyavggasprice", params)

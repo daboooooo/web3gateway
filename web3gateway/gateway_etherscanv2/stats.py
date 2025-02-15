@@ -1,73 +1,86 @@
-from . import EtherScanV2
+"""
+Etherscan Statistics Module
+
+This module provides functionality for network statistics:
+- Supply information (ETH, ETH2)
+- Price data
+- Network metrics
+- Chain analysis
+"""
 
 
 class Stats:
-    """Statistics APIs from Etherscan
-    https://docs.etherscan.io/etherscan-v2/api-endpoints/stats-1
+    """
+    Network statistics API endpoint wrapper.
+
+    Provides methods for retrieving various network statistics
+    including supply, price, and chain metrics.
+
+    Attributes:
+        client: EtherScanV2 client instance for making API calls
     """
 
-    def __init__(self, etherscan: 'EtherScanV2'):
-        self.etherscan = etherscan
+    def __init__(self, client):
+        """
+        Initialize Stats endpoint wrapper.
+
+        Args:
+            client: EtherScanV2 client instance
+        """
+        self.client = client
 
     def ethsupply(self):
-        """Returns the current amount of Ether in circulation.
+        """
+        Get total ETH supply in circulation.
 
         Returns:
-            Total supply in Wei
+            str: Total supply in Wei
         """
-        return self.etherscan.request("stats", "ethsupply", {})
+        return self.client.request("stats", "ethsupply", {})
 
     def ethsupply2(self, **params):
-        """Returns the current amount of Ether in circulation, ETH2 Staking rewards,
-        EIP1559 burnt fees, and total withdrawn ETH from the beacon chain.
+        """
+        Get detailed ETH supply information.
 
         Returns:
-            {
-                "status":"1",
-                "message":"OK",
-                "result":{
-                    "EthSupply":"122373866217800000000000000",
-                    "Eth2Staking":"1157529105115885000000000",
-                    "BurntFees":"3102505506455601519229842",
-                    "WithdrawnTotal":"1170200333006131000000000"
-                }
-            }
+            dict: Supply details containing:
+            - EthSupply: Total supply in Wei
+            - Eth2Staking: Amount staked in ETH2
+            - BurntFees: Total fees burned
+            - WithdrawnTotal: Total ETH withdrawn
         """
-        return self.etherscan.request("stats", "ethsupply2", params)
+        return self.client.request("stats", "ethsupply2", params)
 
     def ethprice(self):
-        """Returns the latest ETH price and other market data.
+        """
+        Get current ETH price and market data.
 
         Returns:
-            {
-                "ethbtc": "0.068",
-                "ethbtc_timestamp": "1684952881",
-                "ethusd": "1842.31",
-                "ethusd_timestamp": "1684952881"
-            }
+            dict: Price information containing:
+            - ethbtc: ETH/BTC ratio
+            - ethbtc_timestamp: BTC price timestamp
+            - ethusd: ETH/USD price
+            - ethusd_timestamp: USD price timestamp
         """
-        return self.etherscan.request("stats", "ethprice", {})
+        return self.client.request("stats", "ethprice", {})
 
     def chainsize(self, startdate: str, enddate: str,
                   clienttype: str = "geth", syncmode: str = "default",
                   sort: str = "asc"):
-        """Returns the daily size of the Ethereum blockchain.
+        """
+        Get blockchain size statistics.
 
         Args:
-            startdate: Start date in yyyy-MM-dd format
-            enddate: End date in yyyy-MM-dd format
-            sort: Sort direction ('asc' or 'desc')
+            startdate: Start date (YYYY-MM-DD)
+            enddate: End date (YYYY-MM-DD)
+            clienttype: Client type (default: geth)
+            syncmode: Sync mode (default: default)
+            sort: Sort direction (asc/desc)
 
         Returns:
-            [{
-                "blockNumber":"7156164",
-                "chainTimeStamp":"2019-02-01",
-                "chainSize":"184726421279",
-                "clientType":"Geth",
-                "syncMode":"Default"
-            }, ...]
+            list: Daily chain size records
         """
-        return self.etherscan.request("stats", "chainsize", {
+        return self.client.request("stats", "chainsize", {
             'startdate': startdate,
             'enddate': enddate,
             'clienttype': clienttype,
@@ -76,32 +89,30 @@ class Stats:
         })
 
     def nodecount(self):
-        """Returns the total number of discoverable Ethereum nodes.
+        """
+        Get total number of Ethereum nodes.
 
         Returns:
-            {
-                "TotalNodeCount": "8004",
-                "LastUpdateTimestamp": "1688051234"
-            }
+            dict: Node count information:
+            - TotalNodeCount: Number of nodes
+            - LastUpdateTimestamp: Last update time
         """
-        return self.etherscan.request("stats", "nodecount", {})
+        return self.client.request("stats", "nodecount", {})
 
+    # PRO endpoints with daily statistics
     def dailytxnfee(self, startdate: str, enddate: str, sort: str = "asc"):
-        """ [PRO] Returns the daily transaction fee in Wei.
+        """
+        [PRO] Get daily transaction fees.
 
         Args:
-            startdate: Start date in yyyy-MM-dd format
-            enddate: End date in yyyy-MM-dd format
-            sort: Sort direction ('asc' or 'desc')
+            startdate: Start date (YYYY-MM-DD)
+            enddate: End date (YYYY-MM-DD)
+            sort: Sort direction (asc/desc)
 
         Returns:
-            [{
-                "UTCDate": "2023-07-01",
-                "unixTimeStamp": "1688169600",
-                "transactionFee_Wei": "123456789000000000"
-            }, ...]
+            list: Daily transaction fee records in Wei
         """
-        return self.etherscan.request("stats", "dailytxnfee", {
+        return self.client.request("stats", "dailytxnfee", {
             'startdate': startdate,
             'enddate': enddate,
             'sort': sort
@@ -122,7 +133,7 @@ class Stats:
                 "newAddressCount": "12345"
             }, ...]
         """
-        return self.etherscan.request("stats", "dailynewaddress", {
+        return self.client.request("stats", "dailynewaddress", {
             'startdate': startdate,
             'enddate': enddate,
             'sort': sort
@@ -143,7 +154,7 @@ class Stats:
                 "networkUtilization": "68.45"
             }, ...]
         """
-        return self.etherscan.request("stats", "dailynetutilization", {
+        return self.client.request("stats", "dailynetutilization", {
             'startdate': startdate,
             'enddate': enddate,
             'sort': sort
@@ -151,20 +162,31 @@ class Stats:
 
     def dailyavghashrate(self, **params):
         """ [PRO] Returns the daily average hash rate."""
-        return self.etherscan.request("stats", "dailyavghashrate", params)
+        return self.client.request("stats", "dailyavghashrate", params)
 
     def dailytx(self, **params):
         """ [PRO] Returns the daily number of transactions."""
-        return self.etherscan.request("stats", "dailytx", params)
+        return self.client.request("stats", "dailytx", params)
 
     def dailyavgnetdifficulty(self, **params):
         """  [PRO] Returns the daily average network difficulty."""
-        return self.etherscan.request("stats", "dailyavgnetdifficulty", params)
+        return self.client.request("stats", "dailyavgnetdifficulty", params)
 
     def ethdailymarketcap(self, **params):
         """ [PRO] Returns the daily market cap of Ethereum."""
-        return self.etherscan.request("stats", "ethdailymarketcap", params)
+        return self.client.request("stats", "ethdailymarketcap", params)
 
     def ethdailyprice(self, **params):
-        """ [PRO] Returns the daily price of Ethereum."""
-        return self.etherscan.request("stats", "ethdailyprice", params)
+        """
+        [PRO] Get historical daily ETH price.
+
+        Args:
+            **params: Query parameters including:
+                - startdate: Start date (YYYY-MM-DD)
+                - enddate: End date (YYYY-MM-DD)
+                - sort: Sort direction
+
+        Returns:
+            list: Daily price records
+        """
+        return self.client.request("stats", "ethdailyprice", params)

@@ -1,37 +1,65 @@
-from . import EtherScanV2
+"""
+Etherscan Transaction Module
+
+This module provides functionality for transaction-related operations:
+- Transaction status queries
+- Receipt status verification
+- Transaction error information
+"""
 
 
 class Transaction:
-    """Transaction APIs from Etherscan
-    https://docs.etherscan.io/etherscan-v2/api-endpoints/stats
+    """
+    Transaction-related API endpoint wrapper.
+
+    Provides methods for querying transaction statuses and receipts,
+    with detailed error information when available.
+
+    Attributes:
+        client: EtherScanV2 client instance for making API calls
     """
 
-    def __init__(self, etherscan: 'EtherScanV2'):
-        self.etherscan = etherscan
+    def __init__(self, client):
+        """
+        Initialize Transaction endpoint wrapper.
+
+        Args:
+            client: EtherScanV2 client instance
+        """
+        self.client = client
 
     def getstatus(self, txhash: str):
-        """Returns the status of a specific transaction.
+        """
+        Get detailed status of a transaction including error information.
 
         Args:
-            txhash: Transaction hash
+            txhash: Transaction hash to query
 
         Returns:
-            {
-                "isError":"1",
-                "errDescription":"Bad jump destination"
-            }
+            dict: Transaction status containing:
+            - isError: "0" for success, "1" for failure
+            - errDescription: Error message if failed
+                (e.g., "Bad jump destination", "Out of gas")
+
+        Note:
+            This endpoint provides more detailed error information
+            compared to gettxreceiptstatus
         """
-        return self.etherscan.request("transaction", "getstatus", {"txhash": txhash})
+        return self.client.request("transaction", "getstatus", {"txhash": txhash})
 
     def gettxreceiptstatus(self, txhash: str):
-        """Returns the receipt status of a specific transaction.
+        """
+        Get basic receipt status of a transaction.
 
         Args:
-            txhash: Transaction hash
+            txhash: Transaction hash to query
 
         Returns:
-            {
-                "status": "1" // 1 = Success, 0 = Fail
-            }
+            dict: Receipt status containing:
+            - status: "1" for success, "0" for failure
+
+        Note:
+            This is a lighter-weight call compared to getstatus,
+            useful when only success/failure information is needed
         """
-        return self.etherscan.request("transaction", "gettxreceiptstatus", {"txhash": txhash})
+        return self.client.request("transaction", "gettxreceiptstatus", {"txhash": txhash})

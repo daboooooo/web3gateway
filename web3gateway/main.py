@@ -1,3 +1,13 @@
+"""
+Web3 RESTful Gateway Main Application
+
+This module implements a FastAPI-based gateway service that provides:
+- Multi-chain support for EVM compatible blockchains
+- Account balance and transaction queries
+- Transaction assembly and submission
+- Basic authentication and CORS support
+"""
+
 import logging
 from datetime import datetime
 from typing import Any, Dict
@@ -13,14 +23,14 @@ from web3gateway.gateway_blockchain import Blockchain
 from web3gateway.gateway_etherscanv2 import EtherScanV2
 
 
-# gateway instances
+# Initialize gateway instances with configuration
 config = load_config_json(None)
-gw_etherscan = EtherScanV2(config)
-gw_blockchain = Blockchain(config)
+gw_etherscan = EtherScanV2(config)  # Etherscan API gateway for blockchain queries
+gw_blockchain = Blockchain(config)   # Direct blockchain interaction gateway
 
 app = FastAPI(title="Web3 Restful API Gateway")
 
-# 添加CORS中间件
+# Enable CORS middleware for cross-origin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,19 +39,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-security = HTTPBasic()
+security = HTTPBasic()  # Basic HTTP authentication handler
 
 
 def with_timestamp(data: Dict[str, Any]) -> Dict[str, Any]:
-    """为响应数据添加时间戳（毫秒级）"""
+    """
+    Add millisecond-precision timestamp to response data
+
+    Args:
+        data (Dict[str, Any]): Response data to be wrapped
+
+    Returns:
+        Dict[str, Any]: Data wrapped with current timestamp
+    """
     return {
-        "timestamp": int(datetime.utcnow().timestamp() * 1000),
+        "timestamp": int(datetime.now().timestamp() * 1000),
         "data": data
     }
 
 
 def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
-    # todo: replace with real authentication
+    """
+    Verify HTTP basic authentication credentials
+
+    Args:
+        credentials: HTTP basic auth credentials
+
+    Raises:
+        HTTPException: If authentication fails
+    """
     username = config['auth_username']
     password = config['auth_password']
     if credentials.username != username or credentials.password != password:
@@ -54,10 +80,19 @@ def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
 
 @app.get("/ping")
 async def ping():
+    """Health check endpoint"""
     return with_timestamp({"message": "pong"})
 
 
 class AssembleTranactionRequest(BaseModel):
+    """
+    Transaction assembly request schema
+
+    Attributes:
+        chain_id (int): Target blockchain network ID
+        tx_params (Dict[str, Any]): Transaction parameters
+        gas_level (str): Desired gas price level (slow/normal/fast)
+    """
     chain_id: int
     tx_params: Dict[str, Any]
     gas_level: str
@@ -66,11 +101,24 @@ class AssembleTranactionRequest(BaseModel):
 @app.post("/transaction/assemble")
 async def assemble_tx(request: AssembleTranactionRequest,
                       credentials: HTTPBasicCredentials = Depends(authenticate)):
+    """
+    Assemble an unsigned transaction with proper gas settings
+
+    Args:
+        request: Transaction assembly parameters
+        credentials: Auth credentials
+
+    Returns:
+        Dict: Assembled transaction data
+
+    Raises:
+        HTTPException: If assembly fails
+    """
     try:
-        # convert address to checksum address
+        # Convert addresses to checksum format for consistency
         from_address = Web3.to_checksum_address(request.tx_params['from'].lower())
         to_address = Web3.to_checksum_address(request.tx_params['to'].lower())
-        # call blockchain gateway to assemble transaction
+        # Call blockchain gateway to assemble transaction
         tx = await gw_blockchain.assemble_unsigned_transaction(
             request.chain_id,
             from_address,
@@ -84,6 +132,13 @@ async def assemble_tx(request: AssembleTranactionRequest,
 
 
 class SendTransactionRequest(BaseModel):
+    """
+    Send transaction request schema
+
+    Attributes:
+        chain_id (int): Target blockchain network ID
+        raw_tx (str): Raw transaction data
+    """
     chain_id: int
     raw_tx: str
 
@@ -91,6 +146,19 @@ class SendTransactionRequest(BaseModel):
 @app.post("/transaction/send")
 async def send_transaction(request: SendTransactionRequest,
                            credentials: HTTPBasicCredentials = Depends(authenticate)):
+    """
+    Send a raw transaction to the blockchain
+
+    Args:
+        request: Send transaction parameters
+        credentials: Auth credentials
+
+    Returns:
+        Dict: Transaction hash
+
+    Raises:
+        HTTPException: If sending fails
+    """
     try:
         tx_hash = await gw_blockchain.send_raw_transaction(
             request.chain_id, request.raw_tx)
@@ -100,6 +168,13 @@ async def send_transaction(request: SendTransactionRequest,
 
 
 class GetTransactionReceiptRequest(BaseModel):
+    """
+    Get transaction receipt request schema
+
+    Attributes:
+        chain_id (int): Target blockchain network ID
+        tx_hash (str): Transaction hash
+    """
     chain_id: int
     tx_hash: str
 
@@ -107,7 +182,19 @@ class GetTransactionReceiptRequest(BaseModel):
 @app.post("/transaction/get_receipt")
 async def get_transaction_receipt(request: GetTransactionReceiptRequest,
                                   credentials: HTTPBasicCredentials = Depends(authenticate)):
-    """ get transaction status """
+    """
+    Get the receipt of a transaction
+
+    Args:
+        request: Get receipt parameters
+        credentials: Auth credentials
+
+    Returns:
+        Dict: Transaction receipt status
+
+    Raises:
+        HTTPException: If retrieval fails
+    """
     try:
         receipt = await gw_blockchain.get_transaction_receipt(
             request.chain_id, request.tx_hash)
@@ -117,6 +204,13 @@ async def get_transaction_receipt(request: GetTransactionReceiptRequest,
 
 
 class AccountBalanceRequest(BaseModel):
+    """
+    Account balance request schema
+
+    Attributes:
+        chain_id (int): Target blockchain network ID
+        address (str): Account address
+    """
     chain_id: int
     address: str
 
@@ -124,6 +218,19 @@ class AccountBalanceRequest(BaseModel):
 @app.post("/account/balance")
 async def get_account_balance(request: AccountBalanceRequest,
                               credentials: HTTPBasicCredentials = Depends(authenticate)):
+    """
+    Get the balance of an account
+
+    Args:
+        request: Account balance parameters
+        credentials: Auth credentials
+
+    Returns:
+        Dict: Account balance
+
+    Raises:
+        HTTPException: If retrieval fails
+    """
     try:
         gw_etherscan.set_chain_id(request.chain_id)
         address = Web3.to_checksum_address(request.address)
@@ -135,6 +242,14 @@ async def get_account_balance(request: AccountBalanceRequest,
 
 
 class AccountTokenBalanceRequest(BaseModel):
+    """
+    Account token balance request schema
+
+    Attributes:
+        chain_id (int): Target blockchain network ID
+        contractaddress (str): Token contract address
+        address (str): Account address
+    """
     chain_id: int
     contractaddress: str
     address: str
@@ -143,6 +258,19 @@ class AccountTokenBalanceRequest(BaseModel):
 @app.post("/account/token_balance")
 async def get_account_token_balance(request: AccountTokenBalanceRequest,
                                     credentials: HTTPBasicCredentials = Depends(authenticate)):
+    """
+    Get the token balance of an account
+
+    Args:
+        request: Token balance parameters
+        credentials: Auth credentials
+
+    Returns:
+        Dict: Token balance
+
+    Raises:
+        HTTPException: If retrieval fails
+    """
     try:
         gw_etherscan.set_chain_id(request.chain_id)
         contract_address = Web3.to_checksum_address(request.contractaddress)
@@ -164,6 +292,13 @@ async def get_account_token_balance(request: AccountTokenBalanceRequest,
 
 
 class AccountTransactionsRequest(BaseModel):
+    """
+    Account transactions request schema
+
+    Attributes:
+        chain_id (int): Target blockchain network ID
+        address (str): Account address
+    """
     chain_id: int
     address: str
 
@@ -171,6 +306,19 @@ class AccountTransactionsRequest(BaseModel):
 @app.post("/account/txlist")
 async def get_account_transactions(request: AccountTransactionsRequest,
                                    credentials: HTTPBasicCredentials = Depends(authenticate)):
+    """
+    Get the list of transactions for an account
+
+    Args:
+        request: Account transactions parameters
+        credentials: Auth credentials
+
+    Returns:
+        Dict: List of transactions
+
+    Raises:
+        HTTPException: If retrieval fails
+    """
     try:
         gw_etherscan.set_chain_id(request.chain_id)
         txs = await gw_etherscan.account.txlist(request.address)
@@ -180,7 +328,10 @@ async def get_account_transactions(request: AccountTransactionsRequest,
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# start uvicorn main:app --reload
 def main():
+    """
+    Application entry point - starts the FastAPI server
+    Using uvicorn with hot reload for development
+    """
     import uvicorn
     uvicorn.run(app, host="localhost", port=8000)

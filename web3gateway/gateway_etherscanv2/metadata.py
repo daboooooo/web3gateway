@@ -1,62 +1,19 @@
+"""
+Etherscan API Metadata Module
 
+This module defines valid parameters and metadata for all API endpoints:
+- Parameter validation maps
+- Base URLs
+- Endpoint definitions
+"""
+
+# Base API URL for all requests
 base_url: str = "https://api.etherscan.io/v2/api"
 
-supported_chains: dict[str, str] = {
-    "Etherscan": "1",
-    "Sepolia Etherscan": "11155111",
-    "Holesky Etherscan": "17000",
-    "BscScan": "56",
-    "Testnet BscScan": "97",
-    "PolygonScan": "137",
-    "Testnet PolygonScan": "80002",
-    "zkEVM PolygonScan": "1101",
-    "Testnet zkEVM PolygonScan": "2442",
-    "BaseScan": "8453",
-    "Testnet BaseScan": "84532",
-    "Arbiscan": "42161",
-    "Nova Arbiscan": "42170",
-    "Sepolia Arbiscan": "421614",
-    "LineaScan": "59144",
-    "Testnet LineaScan": "59141",
-    "FTMScan": "250",
-    "Testnet FTMScan": "4002",
-    "BlastScan": "81457",
-    "Testnet BlastScan": "168587773",
-    "Optimistic Etherscan": "10",
-    "Sepolia Optimistic Etherscan": "11155420",
-    "SnowScan": "43114",
-    "Fuji SnowScan": "43113",
-    "BTTCScan": "199",
-    "Donau BTTCScan": "1028",
-    "CeloScan": "42220",
-    "Alfajores CeloScan": "44787",
-    "Cronoscan": "25",
-    "Fraxscan": "252",
-    "Testnet Fraxscan": "2522",
-    "GnosisScan": "100",
-    "KromaScan": "255",
-    "Testnet KromaScan": "2358",
-    "Mantlescan": "5000",
-    "Testnet Mantlescan": "5003",
-    "Moonbeam Moonscan": "1284",
-    "Moonriver Moonscan": "1285",
-    "Moonbase Moonscan": "1287",
-    "opBNB BscScan": "204",
-    "Testnet opBNB BscScan": "5611",
-    "ScrollScan": "534352",
-    "Testnet ScrollScan": "534351",
-    "Taikoscan": "167000",
-    "Testnet Taikoscan": "167009",
-    "WemixScan": "1111",
-    "Testnet WemixScan": "1112",
-    "zkSync Era": "324",
-    "Testnet zkSync Era": "300",
-    "Xaiscan": "660279",
-    "Sepolia Xaiscan": "37714555429"
-}
-
+# Valid parameters for each API action
+# Format: 'action_name': ['param1', 'param2', ...]
 valid_params = {
-    # Accounts
+    # Account endpoints
     'balance': ['address', 'tag'],
     'balancemulti': ['address', 'tag'],
     'txlist': ['address', 'startblock', 'endblock', 'page', 'offset', 'sort'],
@@ -153,4 +110,20 @@ valid_params = {
 
     # Usage
     'getapilimit': [],
+}
+
+# Parameter descriptions for documentation
+param_descriptions = {
+    "address": "Ethereum address (42 characters beginning with 0x)",
+    "tag": "Pre-defined block parameter (earliest, pending, latest)",
+    "startblock": "Starting block number for the query",
+    "endblock": "Ending block number for the query",
+    "page": "Page number for pagination",
+    "offset": "Number of records per page",
+    "sort": "Sorting preference (asc/desc)",
+    "contractaddress": "Contract address",
+    "txhash": "Transaction hash",
+    "blockno": "Block number",
+    "timestamp": "Unix timestamp",
+    "closest": "Direction to find closest block (before/after)"
 }

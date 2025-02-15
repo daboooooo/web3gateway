@@ -1,82 +1,142 @@
-from . import EtherScanV2
+"""
+Etherscan Contracts Module
+
+This module provides functionality for smart contract operations:
+- Contract ABI retrieval
+- Source code verification
+- Contract creation information
+- Proxy contract verification
+"""
 
 
 class Contracts:
-    """Contract APIs from Etherscan
-    https://docs.etherscan.io/etherscan-v2/api-endpoints/contracts
+    """
+    Contract-related API endpoint wrapper.
+
+    Provides methods for interacting with smart contracts including
+    verification, source code retrieval, and deployment information.
+
+    Attributes:
+        client: EtherScanV2 client instance for making API calls
     """
 
-    def __init__(self, etherscan: 'EtherScanV2'):
-        self.etherscan = etherscan
-
-    def getabi(self, address: str):
-        """Returns the contract ABI for given contract address.
+    def __init__(self, client):
+        """
+        Initialize Contracts endpoint wrapper.
 
         Args:
-            address: Contract address
+            client: EtherScanV2 client instance
+        """
+        self.client = client
+
+    def getabi(self, address: str):
+        """
+        Get the ABI for a verified smart contract.
+
+        Args:
+            address: Contract address to query
 
         Returns:
             Contract ABI as JSON string
+
+        Note:
+            Contract must be verified on Etherscan
         """
-        return self.etherscan.request("contract", "getabi", {'address': address})
+        return self.client.request("contract", "getabi", {'address': address})
 
     def getsourcecode(self, address: str):
-        """Returns the Solidity source code of a verified smart contract.
+        """
+        Get the source code of a verified smart contract.
 
         Args:
-            address: Contract address
+            address: Contract address to query
 
         Returns:
-            List containing contract details including source code
+            List containing contract details including:
+            - Source code
+            - ABI
+            - Construction arguments
+            - Compiler version
         """
-        return self.etherscan.request("contract", "getsourcecode", {'address': address})
+        return self.client.request("contract", "getsourcecode", {'address': address})
 
     def getcontractcreation(self, contractaddresses: str):
-        """Returns a contract's deployer address and transaction hash it was created.
+        """
+        Get contract creator address and creation transaction.
 
         Args:
             contractaddresses: Comma separated list of contract addresses
 
         Returns:
-            List of contract creation details
+            List of contract creation details including:
+            - Creator address
+            - Creation transaction hash
+            - Timestamp
         """
-        return self.etherscan.request("contract", "getcontractcreation",
-                                      {'contractaddresses': contractaddresses})
+        return self.client.request("contract", "getcontractcreation",
+                                   {'contractaddresses': contractaddresses})
 
     def verifysourcecode(self, **params):
-        """Verifies contract source code. Requires multiple parameters.
+        """
+        Submit contract source code for verification.
+
+        Args:
+            **params: Contract verification parameters including:
+                - sourceCode: Contract source code
+                - contractAddress: Address to verify
+                - compilerVersion: Solidity version
+                - optimizationUsed: Optimization flag
+                - constructorArguments: Constructor args (if any)
 
         Returns:
-            GUID for checking verification status
+            GUID: Verification request identifier
+
+        Note:
+            Use checkverifystatus to monitor verification progress
         """
-        return self.etherscan.request("contract", "verifysourcecode", params)
+        return self.client.request("contract", "verifysourcecode", params)
 
     def checkverifystatus(self, guid: str):
-        """Returns the verification status of a contract.
+        """
+        Check status of a contract verification request.
 
         Args:
-            guid: The GUID from verifysourcecode
+            guid: Verification request identifier
 
         Returns:
-            Verification status
+            Verification status:
+            - 'Pending' - In progress
+            - 'Pass' - Successful
+            - 'Fail' - Failed with reason
         """
-        return self.etherscan.request("contract", "checkverifystatus", {'guid': guid})
+        return self.client.request("contract", "checkverifystatus", {'guid': guid})
 
     def verifyproxycontract(self, **params):
-        """Submits a contract verification request for proxy contracts.
-
-        Returns:
-            GUID for checking verification status
         """
-        return self.etherscan.request("contract", "verifyproxycontract", params)
-
-    def checkproxyverification(self, guid: str):
-        """Returns the verification status of a proxy contract.
+        Submit proxy contract for verification.
 
         Args:
-            guid: The GUID from verifyproxycontract
+            **params: Proxy verification parameters including:
+                - address: Proxy contract address
+                - expectedImplementation: Implementation address
+                - constructorArguments: Constructor args (if any)
 
         Returns:
-            Verification status
+            GUID: Verification request identifier
         """
-        return self.etherscan.request("contract", "checkproxyverification", {'guid': guid})
+        return self.client.request("contract", "verifyproxycontract", params)
+
+    def checkproxyverification(self, guid: str):
+        """
+        Check status of a proxy contract verification.
+
+        Args:
+            guid: Verification request identifier
+
+        Returns:
+            Proxy verification status:
+            - 'Pending' - In progress
+            - 'Pass' - Successful
+            - 'Fail' - Failed with reason
+        """
+        return self.client.request("contract", "checkproxyverification", {'guid': guid})
