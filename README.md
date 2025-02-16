@@ -198,10 +198,13 @@ Response:
         "gas": 21000,
         "to": "0x1234567890123456789012345678901234567890",
         "value": 1000000000000000000,
-        "data": "0x"
+        "data": "0x",
+        "maxPriorityFeePerGas":492407668,"maxFeePerGas":1632172748
     }
 }
 ```
+
+You can then sign and send the transaction using the `send` API.
 
 ### Get Transaction List
 
@@ -216,6 +219,7 @@ curl -X POST "http://localhost:8000/account/txlist" \
 ```
 
 Response:
+
 ```json
 {
     "timestamp": 1677654321000,
