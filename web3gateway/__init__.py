@@ -1,7 +1,4 @@
 """
-Web3 Gateway Service
-
-A high-performance RESTful API gateway for blockchain interaction.
+Web3 RESTful Gateway
 """
-
-__version__ = "0.1.0"
+__version__ = "0.1.1"

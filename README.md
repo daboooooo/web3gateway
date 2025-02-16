@@ -1,6 +1,6 @@
 # 🌐 Web3 Restful Gateway
 
-> A high-performance, multi-chain Web3 gateway service that provides unified RESTful APIs for blockchain interaction.
+> A multi-chain Web3 gateway service that provides unified RESTful APIs for blockchain interaction.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.68%2B-green.svg)](https://fastapi.tiangolo.com)
@@ -51,8 +51,6 @@ uvicorn web3gateway.main:app --reload
 
 ```
 
-
-
 ## 🔥 Core APIs
 
 ### Transaction Operations
@@ -88,22 +86,6 @@ curl -X POST "http://localhost:8000/account/balance" \
     "chain_id": 1,
     "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
   }'
-```
-
-## 🏗️ Architecture
-
-```
-web3_restful_gateway/
-├── web3gateway/
-│   ├── main.py           # FastAPI application
-│   ├── config.py         # Configuration management
-│   ├── gateway_blockchain.py   # Blockchain interaction
-│   └── gateway_etherscanv2.py  # Etherscan API wrapper
-├── tests/
-│   ├── test_api.py      # API tests
-│   └── test_gateway.py  # Gateway tests
-└── docker/
-    └── Dockerfile       # Container definition
 ```
 
 ## 🔌 Supported Networks

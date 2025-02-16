@@ -4,37 +4,88 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "web3gateway"
-dynamic = ["version", "dependencies", "optional-dependencies"]
+dynamic = ["version"]
 
 authors = [
-  {name = "Daboooooo"},
-  {name = "Daboooooo", email = "horsen666@gmail.com"},
+  {name = "daboooooo", email = "horsen666@gmail.com"},
 ]
 
-description = "Web3 REST API Gateway"
+description = "Web3Gateway - A Restful Web3 Gateway Service"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {text = "MIT LICENSE"}
-# license = "MIT License"
+requires-python = ">=3.10"
+license = {text = "MIT License"}
 classifiers = [
-    "Environment :: Console",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Operating System :: MacOS",
-    "Operating System :: Unix",
-    "Topic :: Office/Business :: Financial :: Investment",
+  "Environment :: Console",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: MacOS",
+  "Operating System :: Unix",
+  "Topic :: Office/Business :: Financial :: Investment",
 ]
 
+keywords = ["web3", "blockchain", "ethereum", "gateway", "restful", "api"]
+
+dependencies = [
+  # from requirements.txt
+  "fastapi",
+  "uvicorn",
+  "web3",
+  "pydantic",
+  "requests",
+  "redis",
+  "python-multipart",
+]
+
+[project.optional-dependencies]
+web3ai = [
+  "scikit-learn",
+  "joblib",
+  'catboost; platform_machine != "aarch64"',
+  "lightgbm",
+  "xgboost",
+  "tensorboard",
+  "datasieve>=0.1.5",
+]
+develop = [
+  "coveralls",
+  "isort",
+  "mypy",
+  "pre-commit",
+  "pytest-asyncio",
+  "pytest-cov",
+  "pytest-mock",
+  "pytest-random-order",
+  "pytest-timeout",
+  "pytest-xdist",
+  "pytest",
+  "ruff",
+  "time-machine",
+  "types-cachetools",
+  "types-filelock",
+  "types-python-dateutil",
+  "types-requests",
+  "types-tabulate",
+]
+jupyter = [
+  "jupyter",
+  "nbstripout",
+  "ipykernel",
+  "nbconvert",
+]
+all = [
+  "freqtrade[web3ai,jupyter]",
+]
+dev = [
+  "freqtrade[all,develop]",
+]
 
 [project.urls]
 Homepage = "https://github.com/daboooooo/web3gateway"
-Documentation = "https://web3gateway.io"
+Documentation = "https://github.com/daboooooo/web3gateway"
 "Bug Tracker" = "https://github.com/daboooooo/web3gateway/issues"
-
 
 [project.scripts]
 web3gateway = "web3gateway.main:main"
@@ -46,7 +97,7 @@ zip-safe = false
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["web3gateway*"]
-exclude = ["tests", "tests.*", "data", "data*", "projects", "projects*"]
+exclude = ["tests", "tests.*", "data", "data*"]
 namespaces = true
 
 [tool.setuptools.dynamic]
@@ -62,6 +113,7 @@ exclude = '''
     | \.hg
     | \.mypy_cache
     | \.tox
+    | \.env
     | \.venv
     | \data
     | _build
@@ -87,6 +139,7 @@ log_format = "%(asctime)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 addopts = "--dist loadscope"
 
 [tool.mypy]
@@ -105,46 +158,68 @@ plugins = [
 module = "tests.*"
 ignore_errors = true
 
-[[tool.mypy.overrides]]
-# Telegram does not use implicit_optional = false in the current version.
-module = "telegram.*"
-implicit_optional = true
-
 [tool.pyright]
-include = ["*"]
+include = ["web3gateway", "wg_client"]
 exclude = [
   "**/__pycache__",
   "build_helpers/*.py",
+  "wg_client/build/*",
+  "build/*",
 ]
 ignore = ["web3gateway/vendor/**"]
+pythonPlatform = "All"
+pythonVersion = "3.10"
+
+typeCheckingMode = "off"
+# analyzeUnannotatedFunctions = false
+
+reportArgumentType = false  # 155
+reportAssignmentType = false  # 12
+reportAttributeAccessIssue = false  # 255
+reportCallIssue = false  # 23
+reportGeneralTypeIssues = false  # 48
+reportIncompatibleMethodOverride = false  # 15
+reportIncompatibleVariableOverride = false  # 5
+reportIndexIssue = false  # 22
+reportMissingImports = false  # 5
+reportOperatorIssue = false  # 7
+reportOptionalMemberAccess = false  # 35
+reportOptionalOperand = false  # 7
+reportPossiblyUnboundVariable = false  # 36
+reportPrivateImportUsage = false  # 5
+reportRedeclaration = false  # 1
+reportReturnType = false  # 28
+reportTypedDictNotRequiredAccess = false  # 27
 
 
 [tool.ruff]
 line-length = 100
 extend-exclude = [".env", ".venv"]
-target-version = "py38"
 
 [tool.ruff.lint]
 # Exclude UP036 as it's causing the "exit if < 3.9" to fail.
 extend-select = [
   "C90",    # mccabe
-  # "B",    # bugbear
+  "B",      # bugbear
   # "N",    # pep8-naming
   "F",      # pyflakes
   "E",      # pycodestyle
   "W",      # pycodestyle
   "UP",     # pyupgrade
   "I",      # isort
+  "A",      # flake8-builtins
   "TID",    # flake8-tidy-imports
   # "EXE",  # flake8-executable
   # "C4",     # flake8-comprehensions
   "YTT",    # flake8-2020
-  "S",    # flake8-bandit
+  "S",      # flake8-bandit
   # "DTZ",  # flake8-datetimez
   # "RSE",  # flake8-raise
   # "TCH",  # flake8-type-checking
   "PTH",    # flake8-use-pathlib
   # "RUF",    # ruff
+  "ASYNC",  # flake8-async
+  "NPY",    # numpy
 ]
 
 extend-ignore = [
@@ -152,6 +227,7 @@ extend-ignore = [
   "E272",  # Multiple spaces before keyword
   "E221",  # Multiple spaces before operator
   "B007",  # Loop control variable not used
+  "B904",  # BugBear - except raise from
   "S311",  # Standard pseudo-random generators are not suitable for cryptographic purposes
   "S603",  # `subprocess` call: check for execution of untrusted input
   "S607",  # Starting a process with a partial executable path
@@ -164,10 +240,11 @@ extend-ignore = [
   "PTH118",  # `os.path.join()` should be replaced by `Path` with `/` operator
   "PTH123",  # `open()` should be replaced by `Path.open()`
   "PTH120",  # `os.path.dirname()` should be replaced by `Path.parent`
+  "NPY002",  # Numpy legacy random generator
 ]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 30
+max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
 # "regex file matcher" = [
@@ -182,7 +259,7 @@ max-complexity = 30
   "S110",  # `try`-`except`-`pass` detected, consider logging the exception
   ]
 
-"ft_client/test_client/**/*.py" = [
+"wg_client/test_client/**/*.py" = [
   "S101",  # allow assert in tests
 ]
 
@@ -192,13 +269,15 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 
 [tool.ruff.lint.isort]
 lines-after-imports = 2
+known-first-party = ["web3gateway_client"]
+
 
 [tool.flake8]
 # Default from https://flake8.pycqa.org/en/latest/user/options.html#cmdoption-flake8-ignore
 # minus E226
 ignore = ["E121","E123","E126","E24", "E203","E704","W503","W504"]
 max-line-length = 100
-max-complexity = 30
+max-complexity = 12
 exclude = [
     ".git",
     "__pycache__",

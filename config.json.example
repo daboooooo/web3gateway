@@ -3,7 +3,6 @@
     "auth_password": "test_password",
     "infura_project_id": "your infura project id",
     "etherscan_api_key": "your etherscan api key",
-    "bsc_mainnet_explorer_api_key": "your bscscan api key",
     "redis_url": "redis://localhost:6379",
     "redis_host": "localhost",
     "redis_port": 6379,
