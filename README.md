@@ -25,30 +25,73 @@
 
 ## 🔧 Quick Start
 
+### Step1: Install the package
+
+```bash
+pip install web3gateway
+```
+
+### Step2: Create a config file and edit it with your credentials
+
+```bash
+touch config.json
+```
+
+```json
+{
+    "auth_username": "test_user",
+    "auth_password": "test_password",
+    "infura_project_id": "your infura project id",
+    "etherscan_api_key": "your etherscan api key",
+    "redis_url": "redis://localhost:6379",
+    "redis_host": "localhost",
+    "redis_port": 6379,
+    "redis_db": 0,
+    "redis_password": "",
+    "rate_limit_calls": 5,
+    "rate_limit_period": 1,
+    "cache_expiration": 10
+}
+```
+
+### Step3: Make sure you have redis-server installed and running correctly
+
+```bash
+redis-server
+```
+
+### Step4: Start the server
+
+```bash
+web3gateway -c config.json
+```
+
+### Step5: Test the server
+
+```bash
+curl -X GET "http://localhost:8000/ping"
+```
+
+## 📦 Development Installation
+
 ```bash
 # Clone the repo
 git clone https://github.com/daboooooo/web3gateway.git
-# setup the environment
-cd web3_restful_gateway
+
+# Create virtual environment and install dependencies
+cd web3gateway
 ./setup.sh -i
-# start the server
-web3gateway
-```
-
-```bash
-# Clone the repo
-git clone https://github.com/yourusername/web3_restful_gateway.git
-
-# Install dependencies
-pip install -r requirements.txt
+source .env/bin/activate
 
 # Set up configuration
 cp config.json.example config.json
 # Edit config.json with your credentials
 
 # Start the server
-uvicorn web3gateway.main:app --reload
+web3gateway
 
+# Test the server
+curl -X GET "http://localhost:8000/ping"
 ```
 
 ## 🔥 Core APIs
@@ -75,17 +118,122 @@ POST /account/txlist
 GET /ping
 ```
 
-## 🎮 API Example
+## 🎮 API Examples
+
+### Get Account Balance
 
 ```bash
-# Get account balance
 curl -X POST "http://localhost:8000/account/balance" \
-  -H "Content-Type: application/json" \
-  -u "username:password" \
-  -d '{
-    "chain_id": 1,
-    "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-  }'
+     -H "Content-Type: application/json" \
+     -u "test_user:test_password" \
+     -d '{
+       "chain_id": 1,
+       "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+     }'
+```
+
+Response:
+
+```json
+{
+    "timestamp": 1677654321000,
+    "data": {
+        "balance": "1234567890000000000"
+    }
+}
+```
+
+### Get Token Balance
+
+```bash
+curl -X POST "http://localhost:8000/account/token_balance" \
+     -H "Content-Type: application/json" \
+     -u "test_user:test_password" \
+     -d '{
+       "chain_id": 1,
+       "contractaddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+       "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+     }'
+```
+
+Response:
+
+```json
+{
+    "timestamp": 1677654321000,
+    "data": {
+        "contract address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        "token balance": "150000000"
+    }
+}
+```
+
+### Assemble Transaction
+
+```bash
+curl -X POST "http://localhost:8000/transaction/assemble" \
+     -H "Content-Type: application/json" \
+     -u "test_user:test_password" \
+     -d '{
+       "chain_id": 1,
+       "tx_params": {
+         "from": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+         "to": "0x1234567890123456789012345678901234567890",
+         "value": "1000000000000000000"
+       },
+       "gas_level": "normal"
+     }'
+```
+
+Response:
+
+```json
+{
+    "timestamp": 1677654321000,
+    "data": {
+        "chainId": 1,
+        "nonce": 5,
+        "gasPrice": "20000000000",
+        "gas": 21000,
+        "to": "0x1234567890123456789012345678901234567890",
+        "value": 1000000000000000000,
+        "data": "0x"
+    }
+}
+```
+
+### Get Transaction List
+
+```bash
+curl -X POST "http://localhost:8000/account/txlist" \
+     -H "Content-Type: application/json" \
+     -u "test_user:test_password" \
+     -d '{
+       "chain_id": 1,
+       "address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+     }'
+```
+
+Response:
+```json
+{
+    "timestamp": 1677654321000,
+    "data": {
+        "last transactions": [
+            {
+                "blockNumber": "17584321",
+                "timeStamp": "1677654000",
+                "hash": "0xabcd...",
+                "from": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+                "to": "0x1234...",
+                "value": "1000000000000000000",
+                "gas": "21000",
+                "gasPrice": "20000000000"
+            }
+        ]
+    }
+}
 ```
 
 ## 🔌 Supported Networks

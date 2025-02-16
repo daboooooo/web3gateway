@@ -10,7 +10,7 @@ This module implements a FastAPI-based gateway service that provides:
 
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,13 +18,13 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from web3 import Web3
 
-from web3gateway.config import load_config_json
+from web3gateway.config import get_config
 from web3gateway.gateway_blockchain import Blockchain
 from web3gateway.gateway_etherscanv2 import EtherScanV2
 
 
 # Initialize gateway instances with configuration
-config = load_config_json(None)
+config = get_config()
 gw_etherscan = EtherScanV2(config)  # Etherscan API gateway for blockchain queries
 gw_blockchain = Blockchain(config)   # Direct blockchain interaction gateway
 
@@ -42,15 +42,15 @@ app.add_middleware(
 security = HTTPBasic()  # Basic HTTP authentication handler
 
 
-def with_timestamp(data: Dict[str, Any]) -> Dict[str, Any]:
+def with_timestamp(data: dict[str, Any]) -> dict[str, Any]:
     """
     Add millisecond-precision timestamp to response data
 
     Args:
-        data (Dict[str, Any]): Response data to be wrapped
+        data (dict[str, Any]): Response data to be wrapped
 
     Returns:
-        Dict[str, Any]: Data wrapped with current timestamp
+        dict[str, Any]: Data wrapped with current timestamp
     """
     return {
         "timestamp": int(datetime.now().timestamp() * 1000),
@@ -90,11 +90,11 @@ class AssembleTranactionRequest(BaseModel):
 
     Attributes:
         chain_id (int): Target blockchain network ID
-        tx_params (Dict[str, Any]): Transaction parameters
+        tx_params (dict[str, Any]): Transaction parameters
         gas_level (str): Desired gas price level (slow/normal/fast)
     """
     chain_id: int
-    tx_params: Dict[str, Any]
+    tx_params: dict[str, Any]
     gas_level: str
 
 
@@ -109,7 +109,7 @@ async def assemble_tx(request: AssembleTranactionRequest,
         credentials: Auth credentials
 
     Returns:
-        Dict: Assembled transaction data
+        dict: Assembled transaction data
 
     Raises:
         HTTPException: If assembly fails
@@ -154,7 +154,7 @@ async def send_transaction(request: SendTransactionRequest,
         credentials: Auth credentials
 
     Returns:
-        Dict: Transaction hash
+        dict: Transaction hash
 
     Raises:
         HTTPException: If sending fails
@@ -190,7 +190,7 @@ async def get_transaction_receipt(request: GetTransactionReceiptRequest,
         credentials: Auth credentials
 
     Returns:
-        Dict: Transaction receipt status
+        dict: Transaction receipt status
 
     Raises:
         HTTPException: If retrieval fails
@@ -226,7 +226,7 @@ async def get_account_balance(request: AccountBalanceRequest,
         credentials: Auth credentials
 
     Returns:
-        Dict: Account balance
+        dict: Account balance
 
     Raises:
         HTTPException: If retrieval fails
@@ -266,7 +266,7 @@ async def get_account_token_balance(request: AccountTokenBalanceRequest,
         credentials: Auth credentials
 
     Returns:
-        Dict: Token balance
+        dict: Token balance
 
     Raises:
         HTTPException: If retrieval fails
@@ -314,7 +314,7 @@ async def get_account_transactions(request: AccountTransactionsRequest,
         credentials: Auth credentials
 
     Returns:
-        Dict: List of transactions
+        dict: List of transactions
 
     Raises:
         HTTPException: If retrieval fails
