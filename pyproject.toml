@@ -40,15 +40,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-web3ai = [
-  "scikit-learn",
-  "joblib",
-  'catboost; platform_machine != "aarch64"',
-  "lightgbm",
-  "xgboost",
-  "tensorboard",
-  "datasieve>=0.1.5",
-]
 develop = [
   "coveralls",
   "isort",
@@ -69,17 +60,8 @@ develop = [
   "types-requests",
   "types-tabulate",
 ]
-jupyter = [
-  "jupyter",
-  "nbstripout",
-  "ipykernel",
-  "nbconvert",
-]
-all = [
-  "freqtrade[web3ai,jupyter]",
-]
 dev = [
-  "freqtrade[all,develop]",
+  "web3gateway[develop]",
 ]
 
 [project.urls]
